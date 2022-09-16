@@ -19,4 +19,4 @@
 ############################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=0.1
+ver="0.1"
