@@ -424,6 +424,11 @@ do
             # Modify server setting in config file
             sed -i "s/^Server=/Server=${server}/" /etc/zabbix/zabbix_agent2.conf
             sed -i "s/^ServerActive=/ServerActive=${server}/" /etc/zabbix/zabbix_agent2.conf
+
+            # Wait 5 seconds before starting Zabbix Agent2 service
+            sleep 5
+            systemctl start zabbix-agent2
+
             break
             ;;
         "No")
