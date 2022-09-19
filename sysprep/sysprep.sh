@@ -4,7 +4,7 @@
 # Ubuntu VM Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.3 - September 19, 2022
+# Version 0.6 - September 19, 2022
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.3"
+ver="0.6"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -82,21 +82,24 @@ auto_update
 ##      Set hostname
 ###################################################################################################
 unset hostnamevar
-
+hostnamevar=$(hostname)
 # Prompt for new hostname
-printf '\033[1;37mPlease specify hostname [${hostnamevar}]: \033[0m'
+printf "\033[1;37mPlease specify hostname [${hostnamevar}]: \033[0m"
 read hostnamenew
 if [ -z $hostnamenew ]
 then
     # Use current system hostname    
-    hostnamevar = hostname
+    hostnamevar=$hostnamevar
 else
-    hostnamevar = hostnamenew
+    hostnamevar=$hostnamenew
 fi
 
 # Set hostname
 hostnamectl set-hostname $hostnamevar
 printf "\033[1;32mHostname set to ${hostnamevar}\033[0m\n\n"
+
+# Write hostname into /etc/hosts file
+sed -i "s/127.0.1.1.*/127.0.1.1 $(hostname)/g" /etc/hosts
 
 
 ###################################################################################################
