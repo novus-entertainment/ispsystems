@@ -319,7 +319,8 @@ fi
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling OS updates, please wait...\n\033[0m"
-apt update && apt upgrade -y &>/dev/null
+apt update  &>/dev/null
+apt upgrade -y &>/dev/null
 
 # Remove packages that are no longer required
 apt autoremove -y &>/dev/null
@@ -354,13 +355,14 @@ fi
 ##      Join Active Directory
 ###################################################################################################
 printf "\n\n"
-printf "\033[1;37mDo you want to join this machine to Active Directory?\n\n\033[0m"
+printf "\033[1;37mDo you want to join this machine to Active Directory?\n\033[0m"
 select ad in Yes No
 do
     case $ad in
         "Yes")
             # Install required packages
-            printf "\033[1;37mInstalling packages needed to join AD, please wait...\n\033[0m"
+            printf "\n\n"
+            printf "\033[1;37mInstalling packages needed to join AD, please wait...033[0m"
             apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit &>/dev/null
 
             # Discover the NOVUSNOW.LOCAL domain
