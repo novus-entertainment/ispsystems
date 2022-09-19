@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.1"
+ver="0.2"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -36,7 +36,7 @@ auto_update () {
     if [ -z "$updated" ]
     then
         # Check if machine has access to the internet by querying connection to google.ca
-        wget -q --tries=10 --timeout=20 --spider https://google.ca
+        wget -q --inet4-only --tries=10 --timeout=20 --spider https://google.ca
         if [[ $? -eq 0 ]]
         then
             internet=true
@@ -114,49 +114,55 @@ printf "\033[1;32mTimezone set to ${timezonevar}\033[0m\n\n"
 ##      Configure network interfaces
 ###################################################################################################
 
-# Delete old netplan files
-rm -f /etc/netplan/*
+# Option to configure network settings
+printf "\033[1;37mConfigure network settings?\n\033[0m"
+select confignet in Yes No
+do
+    case $confignet in
+        "Yes")
+            # Delete old netplan files
+            rm -f /etc/netplan/*
 
-unset interfaces
+            unset interfaces
 
-# Get array of interface names
-interfaces=( $(ip link | awk -F: '$0 !~ "lo|vir|^[^0-9]"{print $2a;getline}') )
+            # Get array of interface names
+            interfaces=( $(ip link | awk -F: '$0 !~ "lo|vir|^[^0-9]"{print $2a;getline}') )
 
-# Prompt user for settings for each interface detected and write to netplan config file
-for interface in ${interfaces[@]}; do
-    printf "\033[1;33mSpecify settings for network interface: ${interface}\n\033[0m"
+            # Prompt user for settings for each interface detected and write to netplan config file
+            for interface in ${interfaces[@]}; do
+                printf "\033[1;33mSpecify settings for network interface: ${interface}\n\033[0m"
 
-    # Ask if IPv6 support is wanted
-    printf "\033[1;37mDoes this interface need IPv6 configured?\n\033[0m"
-    select v6 in Yes No
-    do
-        case $v6 in
-            "Yes")
-                v6support=true
-                break
-                ;;
-            "No")
-                v6support=false
-                break
-                ;;
-            *)
-                printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
-        esac
-    done
+                # Ask if IPv6 support is wanted
+                printf "\033[1;37mDoes this interface need IPv6 configured?\n\033[0m"
+                select v6 in Yes No
+                do
+                    case $v6 in
+                        "Yes")
+                            v6support=true
+                            break
+                            ;;
+                        "No")
+                            v6support=false
+                            break
+                            ;;
+                        *)
+                            printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
+                    esac
+                done
 
-    unset type
+                unset type
 
-    printf "\n"
-    printf "\033[1;37mSelect interface type:\n\033[0m"
-    select type in DHCP Static
-    do
-        case $type in
-            "DHCP")
-                # Write DHCP settings to interface config file
-                if [ $v6support = true ]
-                then
-                # IPv6 support wanted
-                cat > /etc/netplan/${interface}.yaml <<EOF
+                printf "\n"
+                printf "\033[1;37mSelect interface type:\n\033[0m"
+                select type in DHCP Static
+                do
+                    case $type in
+                        "DHCP")
+                            # Write DHCP settings to interface config file
+                            if [ $v6support = true ]
+                            then
+                            # IPv6 support wanted
+                            cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -182,27 +188,27 @@ network:
       dhcp6: false
 
 EOF
-                fi
-                printf "\n\n"
-                break
-                ;;
-            "Static")
-                if [ $v6support = true ]
-                then
-                    # IPv6 support wanted
-                    printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
-                    read ip
-                    printf "\033[1;37mEnter IPv6 address in CIDR format. Eg: 2605:1700:1:2011::20/64: \033[0m"
-                    read ip6
-                    printf "\033[1;37mEnter IPv4 gateway address: \033[0m"
-                    read gw
-                    printf "\033[1;37mEnter IPv6 gateway address: \033[0m"
-                    read gw6
-                    printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
-                    read dns
+                            fi
+                            printf "\n\n"
+                            break
+                            ;;
+                        "Static")
+                            if [ $v6support = true ]
+                            then
+                                # IPv6 support wanted
+                                printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
+                                read ip
+                                printf "\033[1;37mEnter IPv6 address in CIDR format. Eg: 2605:1700:1:2011::20/64: \033[0m"
+                                read ip6
+                                printf "\033[1;37mEnter IPv4 gateway address: \033[0m"
+                                read gw
+                                printf "\033[1;37mEnter IPv6 gateway address: \033[0m"
+                                read gw6
+                                printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
+                                read dns
 
-                    # Write Static IP settings to interface config file
-                    cat > /etc/netplan/${interface}.yaml <<EOF
+                                # Write Static IP settings to interface config file
+                                cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -219,17 +225,17 @@ network:
           search: [novusnow.local]
           addresses: [${dns}]
 EOF
-                else
-                    # No IPv6 support wanted
-                    printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
-                    read ip
-                    printf "\033[1;37mEnter gateway address: \033[0m"
-                    read gw
-                    printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
-                    read dns
+                            else
+                                # No IPv6 support wanted
+                                printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
+                                read ip
+                                printf "\033[1;37mEnter gateway address: \033[0m"
+                                read gw
+                                printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
+                                read dns
 
-                    # Write Static IP settings to interface config file
-                    cat > /etc/netplan/${interface}.yaml <<EOF
+                                # Write Static IP settings to interface config file
+                                cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -245,45 +251,60 @@ network:
           search: [novusnow.local]
           addresses: [${dns}]
 EOF
-                fi
-                break
-                ;;
-            *)
-                printf "Invalid selection ${REPLY}\n\n"
-                break
-                ;;
-        esac
-    done
+                            fi
+                            break
+                            ;;
+                        *)
+                            printf "Invalid selection ${REPLY}\n\n"
+                            break
+                            ;;
+                    esac
+                done
+            done
+
+            # Apply netplan configuration
+            netplan apply
+
+            # Sleep for 5 seconds to wait for interfaces to come up
+            sleep 5
+            printf "\n\n"
+
+            # Check for Sysprep script updates
+            auto_update
+
+            break
+            ;;
+        "No")
+            # Skip network configuration
+            printf "\033[1;33mNetwork configuration skipped.\n\033[0m"
+            break
+            ;;
+        *)
+            printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
+    esac
 done
-
-# Apply netplan configuration
-netplan apply
-
-# Sleep for 5 seconds to wait for interfaces to come up
-sleep 5
-printf "\n\n"
-
-# Check for Sysprep script updates
-auto_update
 
 ###################################################################################################
 ##      Configure UFW Firewall
 ###################################################################################################
-if [ $v6support = true ]
+# Skip firewall configuration if network configuration was skipped.
+if [ $confignet = Yes ]
 then
-    # Enable IPv6 rule generation in UFW default config
-    sed -i "s/IPV6=no/IPV6=yes/" /etc/default/ufw
-else
-    # Disable IPv6 rule generation in UFW default config
-    sed -i "s/IPV6=yes/IPV6=no/" /etc/default/ufw
+    if [ $v6support = true ]
+    then
+        # Enable IPv6 rule generation in UFW default config
+        sed -i "s/IPV6=no/IPV6=yes/" /etc/default/ufw
+    else
+        # Disable IPv6 rule generation in UFW default config
+        sed -i "s/IPV6=yes/IPV6=no/" /etc/default/ufw
+    fi
+
+    # Set default inbound behavior to block
+    ufw default deny &>/dev/null
+
+    # Allow SSH
+    ufw allow 22/tcp comment 'SSH' &>/dev/null
 fi
-
-# Set default inbound behavior to block
-ufw default deny &>/dev/null
-
-# Allow SSH
-ufw allow 22/tcp comment 'SSH' &>/dev/null
-
 
 ###################################################################################################
 ##      Update OS
@@ -291,6 +312,9 @@ ufw allow 22/tcp comment 'SSH' &>/dev/null
 printf "\n\n"
 printf "\033[1;37mInstalling OS updates\n\033[0m"
 apt update && apt upgrade -y
+
+# Remove packages that are no longer required
+apt autoremove -y
 
 
 ###################################################################################################
@@ -431,6 +455,9 @@ do
             sleep 5
             systemctl start zabbix-agent2
 
+            # Cleanup installer files
+            rm -rf /root/zabbix-release_*
+
             break
             ;;
         "No")
@@ -452,9 +479,6 @@ select reboot in Yes No
 do
     case $reboot in
         "Yes")
-            # Remove sysprep script
-            rm -f /root/sysprep.sh
-
             # Reboot system
             shutdown -r now
             break
@@ -462,9 +486,6 @@ do
         "No")
             # Inform user a system reboot is needed as soon as they can do it
             printf "\033[1;33mPlease reboot at your earliest convenience.\n\n\033[0m"
-
-            # Remove sysprep script
-            rm -f /root/sysprep.sh
             break
             ;;
         *)
