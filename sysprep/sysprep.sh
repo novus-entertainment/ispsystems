@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###################################################################################################
-# Ubuntu VM Sysprep Script
+# Ubuntu 20.04 Sysprep Script
 #
 # Created by: Brian Hill
 # Version 0.7 - September 19, 2022
@@ -47,7 +47,7 @@ auto_update () {
         if [ "$internet" = true ]
         then
             # Download script from GitHub repo
-            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
+            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/20.04/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
 
             # Check version of downloaded script
             version=$(awk -F'"' '/^ver=/ {print $2}' sysprep_temp.sh)
