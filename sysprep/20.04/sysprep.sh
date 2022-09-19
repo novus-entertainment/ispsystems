@@ -4,7 +4,7 @@
 # Ubuntu 20.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.7 - September 19, 2022
+# Version 0.8 - September 19, 2022
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.7"
+ver="0.8"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -330,8 +330,25 @@ apt autoremove -y  &>/dev/null
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-apt install git  &>/dev/null
+apt install git neofetch &>/dev/null
 
+
+# Add neofetch to .bashrc to display summary after login
+checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
+if [ -n $checkneofetch ]
+then
+    cat >> ~/.bashrc <<EOF
+neofetch
+EOF
+
+    cat >> /etc/skel/.bashrc <<EOF
+neofetch
+EOF
+
+    cat >> /home/admin/.bashrc <<EOF
+neofetch
+EOF
+fi
 
 ###################################################################################################
 ##      Join Active Directory
