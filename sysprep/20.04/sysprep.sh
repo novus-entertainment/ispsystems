@@ -4,7 +4,7 @@
 # Ubuntu 20.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.8 - September 19, 2022
+# Version 0.9 - September 19, 2022
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.8"
+ver="0.9"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -319,10 +319,10 @@ fi
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling OS updates, please wait...\n\033[0m"
-apt update && apt upgrade -y  &>/dev/null
+apt update && apt upgrade -y &>/dev/null
 
 # Remove packages that are no longer required
-apt autoremove -y  &>/dev/null
+apt autoremove -y &>/dev/null
 
 
 ###################################################################################################
@@ -330,12 +330,12 @@ apt autoremove -y  &>/dev/null
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-apt install git neofetch &>/dev/null
+apt install -y git neofetch &>/dev/null
 
 
 # Add neofetch to .bashrc to display summary after login
 checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
-if [ -n $checkneofetch ]
+if [[ -z ${checkneofetch} ]]
 then
     cat >> ~/.bashrc <<EOF
 neofetch
@@ -354,13 +354,13 @@ fi
 ##      Join Active Directory
 ###################################################################################################
 printf "\n\n"
-printf "\033[1;37mDo you want to join this machine to Active Directory?\n\033[0m"
+printf "\033[1;37mDo you want to join this machine to Active Directory?\n\n\033[0m"
 select ad in Yes No
 do
     case $ad in
         "Yes")
             # Install required packages
-            printf "\033[1;37mInstalling packages needed to join AD, please wait.\n\033[0m"
+            printf "\033[1;37mInstalling packages needed to join AD, please wait...\n\033[0m"
             apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit &>/dev/null
 
             # Discover the NOVUSNOW.LOCAL domain
