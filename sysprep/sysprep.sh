@@ -4,7 +4,7 @@
 # Ubuntu VM Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.1 - September 1, 2022
+# Version 0.3 - September 19, 2022
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
