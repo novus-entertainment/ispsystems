@@ -115,7 +115,7 @@ printf "\033[1;32mTimezone set to ${timezonevar}\033[0m\n\n"
 ###################################################################################################
 
 # Delete old netplan files
-rm -f /etc/netplan/*.yaml
+rm -f /etc/netplan/*
 
 unset interfaces
 
@@ -164,7 +164,6 @@ network:
     ${interface}:
       optional: true
       accept-ra: true
-      link-local: [ ipv4, ipv6 ]
       dhcp4: true
       dhcp6: true
 
@@ -179,7 +178,6 @@ network:
     ${interface}:
       optional: true
       accept-ra: false
-      link-local: [ ipv4 ]
       dhcp4: true
       dhcp6: false
 
@@ -212,7 +210,6 @@ network:
     ${interface}:
       optional: true
       accept-ra: true
-      link-local: [ ipv4, ipv6 ]
       addresses:
           - ${ip}
           - ${ip6}
@@ -301,7 +298,7 @@ apt update && apt upgrade -y
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-apt install git >&/dev/null
+apt install git
 
 
 ###################################################################################################
@@ -315,13 +312,16 @@ do
         "Yes")
             # Install required packages
             printf "\033[1;37mInstalling packages needed to join AD, please wait.\n\033[0m"
-            apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit &>/dev/null
+            apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
+
+            # Discover the NOVUSNOW.LOCAL domain
+            realm -v discover novusnow.local
 
             # Prompt for AD join username
             printf "\n\n"
-            printf "\033[1;37mPlease enter AD user to perform join function as.\033[0m"
+            printf "\033[1;37mPlease enter AD user to perform join function as: \033[0m"
             read aduser
-            realm join NOVUSNOW.LOCAL -U $aduser
+            realm join -v NOVUSNOW.LOCAL -U $aduser
 
             # Modify /etc/pam.d/common-session to create AD user's local home folder on first login
             cat >> /etc/pam.d/common-session <<EOF
@@ -330,7 +330,7 @@ session optional        pam_mkhomedir.so skel=/etc/skel umask=077
 EOF
 
             # Create SSSD config file. Restrict login to "ISP Server Admins" AD group.
-            rm -f /etc/sssd/sssd.conf
+            :> /etc/sssd/sssd.conf
             cat > /etc/sssd/sssd.conf <<EOF
 [sssd]
 domains = novusnow.local
@@ -354,7 +354,7 @@ EOF
 
             # Restart SSSD service to have changes take effect
             printf "Restarting services\n"
-            systemctl restart sssd &>/dev/null
+            systemctl restart sssd 
 
             # Allow specific AD groups to have SUDO permission
             cat >> /etc/sudoers <<EOF
@@ -381,6 +381,8 @@ select zabbix in Yes No
 do
     case $zabbix in
         "Yes")
+            printf "\033[1;37m\nAdding Zabbix repository and installing packages, please wait...\n\033[0m"
+            
             # Add official repository
             wget https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.2-2%2Bubuntu20.04_all.deb
             dpkg -i zabbix-release_6.2-2+ubuntu20.04_all.deb
