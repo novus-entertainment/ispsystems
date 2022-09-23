@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.9"
+ver="0.10"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -319,11 +319,11 @@ fi
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling OS updates, please wait...\n\033[0m"
-apt update  &>/dev/null
-apt upgrade -y &>/dev/null
+apt update
+apt upgrade -y
 
 # Remove packages that are no longer required
-apt autoremove -y &>/dev/null
+apt autoremove -y
 
 
 ###################################################################################################
@@ -331,7 +331,7 @@ apt autoremove -y &>/dev/null
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-apt install -y git neofetch &>/dev/null
+apt install -y git neofetch
 
 
 # Add neofetch to .bashrc to display summary after login
@@ -362,17 +362,17 @@ do
         "Yes")
             # Install required packages
             printf "\n\n"
-            printf "\033[1;37mInstalling packages needed to join AD, please wait...033[0m"
-            apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit &>/dev/null
+            printf "\033[1;37mInstalling packages needed to join AD, please wait...\033[0m"
+            apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
 
             # Discover the NOVUSNOW.LOCAL domain
-            realm -v discover novusnow.local &>/dev/null
+            realm -v discover novusnow.local
 
             # Prompt for AD join username
             printf "\n\n"
             printf "\033[1;37mPlease enter AD user to perform join function as: \033[0m"
             read aduser
-            realm join -v NOVUSNOW.LOCAL -U $aduser &>/dev/null
+            realm join -v NOVUSNOW.LOCAL -U $aduser
 
             # Modify /etc/pam.d/common-session to create AD user's local home folder on first login
             cat >> /etc/pam.d/common-session <<EOF
@@ -435,12 +435,12 @@ do
             printf "\033[1;37m\nAdding Zabbix repository and installing packages, please wait...\n\033[0m"
             
             # Add official repository
-            wget https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.2-2%2Bubuntu20.04_all.deb &>/dev/null
-            dpkg -i zabbix-release_6.2-2+ubuntu20.04_all.deb &>/dev/null
+            wget https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.2-2%2Bubuntu20.04_all.deb
+            dpkg -i zabbix-release_6.2-2+ubuntu20.04_all.deb
 
             # Install Zabbix Agent 2
             apt update &>/dev/null
-            apt install zabbix-agent2 &>/dev/null
+            apt install zabbix-agent2
 
             # Stop agent and enable service
             systemctl stop zabbix-agent2
@@ -472,7 +472,7 @@ do
 
             # Download Zabbix Agent2 config file from git repo
             mv /etc/zabbix/zabbix_agent2.conf /etc/zabbix/zabbix_agent2.conf.bak
-            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/zabbix/config/agent/ubuntu20.04/zabbix_agent2.conf --output /etc/zabbix/zabbix_agent2.conf &>/dev/null
+            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/zabbix/config/agent/ubuntu20.04/zabbix_agent2.conf --output /etc/zabbix/zabbix_agent2.conf
 
             # Modify server setting in config file
             sed -i "s/^Server=/Server=${server}/" /etc/zabbix/zabbix_agent2.conf
