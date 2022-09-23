@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.12"
+ver="0.13"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -363,11 +363,7 @@ apt install -y git neofetch
 checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
 if [[ -z ${checkneofetch} ]]
 then
-    cat >> ~/.bashrc <<EOF
-neofetch
-EOF
-
-    cat >> /etc/skel/.bashrc <<EOF
+   cat >> /etc/skel/.bashrc <<EOF
 neofetch
 EOF
 
