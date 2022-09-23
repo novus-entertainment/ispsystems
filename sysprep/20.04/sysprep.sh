@@ -506,6 +506,9 @@ do
             # Cleanup installer files
             rm -rf /root/zabbix-release_*
 
+            # Add firewall rule
+            ufw allow 10050/tcp comment 'Zabbix Agent2'
+
             break
             ;;
         "No")
