@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.10"
+ver="0.11"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -233,6 +233,20 @@ network:
           search: [novusnow.local]
           addresses: [${dns}]
 EOF
+
+                                # Comment out un-needed netplan settings
+                                if [ -z $gw ]
+                                then
+                                    sed -i "s/      gateway4/#      gateway4/" /etc/netplan/${interface}.yaml
+                                fi
+                                if [ -z $gw6 ]
+                                then
+                                    sed -i "s/      gateway6/#      gateway6/" /etc/netplan/${interface}.yaml
+                                fi
+                                if [ -z $dns ]
+                                then
+                                    sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
+                                fi
                             else
                                 # No IPv6 support wanted
                                 printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
@@ -259,6 +273,17 @@ network:
           search: [novusnow.local]
           addresses: [${dns}]
 EOF
+
+                                # Comment out un-needed netplan settings
+                                if [ -z $gw ]
+                                then
+                                    sed -i "s/      gateway4/#      gateway4/" /etc/netplan/${interface}.yaml
+                                fi
+                                if [ -z $dns ]
+                                then
+                                    sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
+                                fi
+
                             fi
                             break
                             ;;
