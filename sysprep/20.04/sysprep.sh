@@ -4,7 +4,7 @@
 # Ubuntu 20.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.9 - September 19, 2022
+# Version 0.13 - September 23, 2022
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
