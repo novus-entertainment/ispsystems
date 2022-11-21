@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.13"
+ver="0.14"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -337,6 +337,9 @@ then
 
     # Allow SSH
     ufw allow 22/tcp comment 'SSH' &>/dev/null
+    
+    # Enable UFW Firewall
+    ufw enable &>/dev/null
 fi
 
 ###################################################################################################
