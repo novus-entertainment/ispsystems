@@ -360,7 +360,7 @@ apt autoremove -y
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-apt install -y git neofetch
+apt install -y git neofetch pv
 
 
 # Add neofetch to .bashrc to display summary after login
