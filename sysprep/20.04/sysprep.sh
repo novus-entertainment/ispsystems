@@ -336,7 +336,7 @@ then
     ufw default deny &>/dev/null
 
     # Allow SSH
-    ufw allow 22/tcp comment 'SSH' &>/dev/null
+    ufw allow 22/tcp comment 'SSH service' &>/dev/null
     
     # Enable UFW Firewall
     ufw enable &>/dev/null
@@ -393,12 +393,28 @@ do
             # Discover the NOVUSNOW.LOCAL domain
             realm -v discover novusnow.local
 
+            # Prompt for OU to place Computer Object into
+            printf "\033[1;37mWhich OU should this Computer Object be created in?\n\033[0m"
+            select ad_ou in Internal External
+            do
+                case $ad_ou in
+                    "Internal")
+                        ou_path="Internal Facing"
+                        break
+                        ;;
+                    "External")
+                        ou_path="External Facing"
+                        break
+                        ;;
+                esac
+            done
+
             # Prompt for AD join username
             printf "\n\n"
             printf "\033[1;37mPlease enter AD user to perform join function as: \033[0m"
             read aduser
-            realm join -v NOVUSNOW.LOCAL -U $aduser
-
+            realm join -v --computer-ou="OU=${ou_path},OU=Servers,DC=novusnow,DC=local" --automatic-id-mapping=no -U $aduser NOVUSNOW.LOCAL
+            
             # Modify /etc/pam.d/common-session to create AD user's local home folder on first login
             cat >> /etc/pam.d/common-session <<EOF
 # Create Home Dir automatically after initial login
@@ -481,7 +497,7 @@ do
                         break
                         ;;
                     "Mediaroom")
-                        server=10.252.100.9
+                        server=10.252.100.13
                         break
                         ;;
                     "Network-Core")
@@ -489,7 +505,7 @@ do
                         break
                         ;;
                     "Network-Access")
-                        server=192.168.66.60
+                        server=192.168.66.71
                         break
                         ;;
                 esac
