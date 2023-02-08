@@ -27,16 +27,20 @@ Connect-NSGroup -Group $nimblea -Credential $username
 $volumes = Get-NSVolume | Where {($_.name -like "Vol-*")}
 
 # Hourly Snapshot Cleanup
-$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddHours(-48) -UFormat %s -Millisecond 0)) -and ($_.name -like "*hourly*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot
+Write-Host "Cleaning up hourly snapshots older than" $(get-date $(get-date).AddHours(-48))
+$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddHours(-48) -UFormat %s -Millisecond 0)) -and ($_.name -like "*hourly*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot -Verbose
 
 # Daily Snapshot Cleanup
-$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-36) -UFormat %s -Millisecond 0)) -and ($_.name -like "*daily*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot
+Write-Host "Cleaning up daily snapshots older than" $(get-date $(get-date).AddDays(-36))
+$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-36) -UFormat %s -Millisecond 0)) -and ($_.name -like "*daily*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot -Verbose
 
 # Weekly Snapshot Cleanup
-$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-$(26 * 7)) -UFormat %s -Millisecond 0)) -and ($_.name -like "*weekly*") -and ($_.name -NotMatch "Veeam*")} | Remove-NSSnapShot
+Write-Host "Cleaning up weekly snapshots older than" $(get-date $(get-date).AddDays(-$(26 * 7)))
+$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-$(26 * 7)) -UFormat %s -Millisecond 0)) -and ($_.name -like "*weekly*") -and ($_.name -NotMatch "Veeam*")} | Remove-NSSnapShot -Verbose
 
 # Disconnect from Nimble A
 Disconnect-NSGroup
+
 
 
 
@@ -50,13 +54,16 @@ Connect-NSGroup -Group $nimbleb -Credential $username
 $volumes = Get-NSVolume | Where {($_.name -like "Vol-*")}
 
 # Hourly Snapshot Cleanup
-$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddHours(-48) -UFormat %s -Millisecond 0)) -and ($_.name -like "*hourly*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot
+Write-Host "Cleaning up hourly snapshots older than" $(get-date $(get-date).AddHours(-48))
+$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddHours(-48) -UFormat %s -Millisecond 0)) -and ($_.name -like "*hourly*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot -Verbose
 
 # Daily Snapshot Cleanup
-$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-36) -UFormat %s -Millisecond 0)) -and ($_.name -like "*daily*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot
+Write-Host "Cleaning up daily snapshots older than" $(get-date $(get-date).AddDays(-36))
+$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-36) -UFormat %s -Millisecond 0)) -and ($_.name -like "*daily*") -and ($_.name -notlike "Veeam*")} | Remove-NSSnapShot -Verbose
 
 # Weekly Snapshot Cleanup
-$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-$(26 * 7)) -UFormat %s -Millisecond 0)) -and ($_.name -like "*weekly*") -and ($_.name -NotMatch "Veeam*")} | Remove-NSSnapShot
+Write-Host "Cleaning up weekly snapshots older than" $(get-date $(get-date).AddDays(-$(26 * 7)))
+$volumes | ForEach-Object { Get-NSSnapshot -vol_name $_.name } | where {($_.creation_time -lt (get-date $(get-date).AddDays(-$(26 * 7)) -UFormat %s -Millisecond 0)) -and ($_.name -like "*weekly*") -and ($_.name -NotMatch "Veeam*")} | Remove-NSSnapShot -Verbose
 
 # Disconnect from Nimble A
 Disconnect-NSGroup
