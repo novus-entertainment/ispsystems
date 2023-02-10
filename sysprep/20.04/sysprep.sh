@@ -227,11 +227,15 @@ network:
       addresses:
           - ${ip}
           - ${ip6}
-      gateway4: ${gw}
-      gateway6: ${gw6}
       nameservers:
           search: [novusnow.local]
           addresses: [${dns}]
+      routes:
+        - to: default
+          via: ${gw}
+        - on-link: true
+          to: ::/0
+          via: ${gw6}
 EOF
 
                                 # Comment out un-needed netplan settings
@@ -268,10 +272,12 @@ network:
       link-local: []
       addresses:
           - ${ip}
-      gateway4: ${gw}
       nameservers:
           search: [novusnow.local]
           addresses: [${dns}]
+      routes:
+        - to: default
+          via: ${gw}
 EOF
 
                                 # Comment out un-needed netplan settings
