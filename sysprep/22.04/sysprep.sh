@@ -4,7 +4,7 @@
 # Ubuntu 22.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.1 - March 24, 2023
+# Version: 1 - March 24, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.1"
+ver=1
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -50,10 +50,10 @@ auto_update () {
             curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/22.04/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
 
             # Check version of downloaded script
-            version=$(awk -F'"' '/^ver=/ {print $2}' sysprep_temp.sh)
+            version=$(awk -F'=' '/^ver=/ {print $2}' sysprep_temp.sh)
 
             # If newer delete old sysprep.sh and replace with updated one
-            if [ "$version" != "$ver" ]
+            if [ $version -gt $ver ]
             then
                 rm /root/sysprep.sh
                 mv /root/sysprep_temp.sh /root/sysprep.sh
@@ -66,11 +66,17 @@ auto_update () {
                 printf "\033[1;31mA new version of the Sysprep script has been downloaded. Restarting the script in 5 seconds.\n\n\033[0m"
                 sleep 5
                 exec /root/sysprep.sh
-            else
+            elif [ $version -eq $ver ]
+			then
                 rm /root/sysprep_temp.sh
                 printf "\033[1;32mAlready running latest version of Sysprep script.\033[0m\n\n"
                 # Set updated variable as true
                 updated=true
+			elif [ $version -lt $ver ]
+			then
+				rm /root/sysprep_temp.sh
+				print printf "\033[1;33mLocal sysprep script is newer than repository version.\033[0m\n\n"
+				updated=true
             fi
         fi
     fi
@@ -129,7 +135,7 @@ test_cidr () {
 	for var in "$a" "$b" "$c" "$d" "$e"; do
 		case $var in
 			""|*[!0123456789]*) 
-				printf "Invalid CIDR format IP address entered: $cidr\n"
+				printf "\033[1;31mInvalid CIDR format IP address entered: $1\033[0m\n"
 				network_config
 		esac
 	done
@@ -142,9 +148,9 @@ test_cidr () {
 	   [ "$d" -ge 0 ] && [ "$d" -le 255 ] &&
 	   [ "$e" -ge 0 ] && [ "$e" -le 32  ]
 	then
-		printf '"%s" is a valid CIDR address\n' "$ipaddr"
+		# Do nothing
 	else
-		printf '"%s" is not a valid CIDR address\n' "$ipaddr"
+		printf '\033[1;31m"%s" is not a valid CIDR address\033[0m\n' "$ipaddr"
 		network_config
 	fi
 }
@@ -156,7 +162,7 @@ test_ip () {
 	for var in "$a" "$b" "$c" "$d"; do
 		case $var in
 			""|*[!0123456789]*) 
-				printf "Invalid CIDR format IP address entered: $cidr\n"
+				printf "\033[1;31mInvalid IP address entered: $cidr\033[0m\n"
 				network_config
 		esac
 	done
@@ -168,9 +174,9 @@ test_ip () {
 	   [ "$c" -ge 0 ] && [ "$c" -le 255 ] &&
 	   [ "$d" -ge 0 ] && [ "$d" -le 255 ]
 	then
-		printf '"%s" is a valid IP address\n' "$ipaddr"
+		# Do nothing
 	else
-		printf '"%s" is not a valid IP address\n' "$ipaddr"
+		printf '\033[1;31m"%s" is not a valid IP address\033[0m\n' "$ipaddr"
 		network_config
 	fi
 }
