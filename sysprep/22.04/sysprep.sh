@@ -4,7 +4,7 @@
 # Ubuntu 22.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 1 - March 24, 2023
+# Version: 2 - March 24, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=1
+ver=2
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -135,7 +135,7 @@ test_cidr () {
 	for var in "$a" "$b" "$c" "$d" "$e"; do
 		case $var in
 			""|*[!0123456789]*) 
-				printf "\033[1;31mInvalid CIDR format IP address entered: $1\033[0m\n"
+				printf '\033[1;31mInvalid CIDR format IP address entered: $1\033[0m\n'
 				network_config
 		esac
 	done
@@ -149,6 +149,7 @@ test_cidr () {
 	   [ "$e" -ge 0 ] && [ "$e" -le 32  ]
 	then
 		# Do nothing
+		printf '\n'
 	else
 		printf '\033[1;31m"%s" is not a valid CIDR address\033[0m\n' "$ipaddr"
 		network_config
@@ -162,7 +163,7 @@ test_ip () {
 	for var in "$a" "$b" "$c" "$d"; do
 		case $var in
 			""|*[!0123456789]*) 
-				printf "\033[1;31mInvalid IP address entered: $cidr\033[0m\n"
+				printf '\033[1;31mInvalid IP address entered: $1\033[0m\n'
 				network_config
 		esac
 	done
@@ -175,6 +176,7 @@ test_ip () {
 	   [ "$d" -ge 0 ] && [ "$d" -le 255 ]
 	then
 		# Do nothing
+		printf '\n'
 	else
 		printf '\033[1;31m"%s" is not a valid IP address\033[0m\n' "$ipaddr"
 		network_config
@@ -438,7 +440,6 @@ printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
 apt install -y git neofetch pv
 
-
 # Add neofetch to .bashrc to display summary after login
 checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
 if [[ -z ${checkneofetch} ]]
@@ -451,6 +452,20 @@ EOF
 neofetch
 EOF
 fi
+
+
+###################################################################################################
+##      QoL Improvements
+###################################################################################################
+printf "\n\n"
+printf "\033[1;37mMaking quality of life improvements, please wait...\n\n\033[0m"
+
+# Disable MOTD News
+sed -i "s/ENABLED=1/ENABLED=0/" /etc/default/motd-news
+
+# Disable ESM Messages
+sed -Ezi.orig -e 's/(def _output_esm_service_status.outstream, have_esm_service, service_type.:\n)/\1    return\n/' -e 's/(def _output_esm_package_alert.*?\n.*?\n.:\n)/\1    return\n/' /usr/lib/update-notifier/apt_check.py
+
 
 ###################################################################################################
 ##      Join Active Directory
