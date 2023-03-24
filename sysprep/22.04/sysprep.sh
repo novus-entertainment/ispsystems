@@ -4,7 +4,7 @@
 # Ubuntu 22.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 2 - March 24, 2023
+# Version: 3 - March 24, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=2
+ver=3
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
