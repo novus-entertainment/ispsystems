@@ -4,7 +4,7 @@
 # Ubuntu 22.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 3 - March 24, 2023
+# Version: 4 - March 24, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=3
+ver=4
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -464,7 +464,10 @@ printf "\033[1;37mMaking quality of life improvements, please wait...\n\n\033[0m
 sed -i "s/ENABLED=1/ENABLED=0/" /etc/default/motd-news
 
 # Disable ESM Messages
-sed -Ezi.orig -e 's/(def _output_esm_service_status.outstream, have_esm_service, service_type.:\n)/\1    return\n/' -e 's/(def _output_esm_package_alert.*?\n.*?\n.:\n)/\1    return\n/' /usr/lib/update-notifier/apt_check.py
+sed -Ezi.orig \
+  -e 's/(def _output_esm_service_status.outstream, have_esm_service, service_type.:\n)/\1    return\n/' \
+  -e 's/(def _output_esm_package_alert.*?\n.*?\n.:\n)/\1    return\n/' \
+  /usr/lib/update-notifier/apt_check.py
 
 
 ###################################################################################################
