@@ -47,7 +47,7 @@ auto_update () {
         if [ "$internet" = true ]
         then
             # Download script from GitHub repo
-            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/22.04/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
+            curl --insecure https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/22.04/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
 
             # Check version of downloaded script
             version=$(awk -F'=' '/^ver=/ {print $2}' sysprep_temp.sh)
