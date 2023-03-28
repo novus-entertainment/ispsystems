@@ -156,6 +156,19 @@ test_cidr () {
 	fi
 }
 
+test_cidr6 () {
+	regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}\/[1-9][1-9]$'
+	var="$1"
+
+	if [[ $var =~ $regex ]]; then
+		# Valid IPv6 CIDR Address
+		printf '\n'
+	else
+		printf '\033[1;31m"$1" is not a valid IPv6 CIDR address\033[0m\n'
+		network_config
+	fi
+}
+
 # Function to test IP address without CIDR
 test_ip () {
 	IFS='./' read -r a b c d <<< $1
@@ -183,6 +196,19 @@ test_ip () {
 	fi
 }
 
+test_ip6 () {
+	regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+	var="$1"
+
+	if [[ $var =~ $regex ]]; then
+		# Valid IPv6 CIDR Address
+		printf '\n'
+	else
+		printf '\033[1;31m"$1" is not a valid IPv6 address\033[0m\n'
+		network_config
+	fi
+}
+
 # Option to configure network settings
 network_config () {
 printf "\033[1;37mConfigure network settings?\n\033[0m"
@@ -200,6 +226,7 @@ do
 
 			# Prompt user for settings for each interface detected and write to netplan config file
 			for interface in ${interfaces[@]}; do
+				printf "\n"
 				printf "\033[1;33mSpecify settings for network interface: ${interface}\n\033[0m"
 
 				# Ask if IPv6 support is wanted
@@ -266,22 +293,26 @@ EOF
 							if [ $v6support = true ]
 							then
 								# IPv6 support wanted
+								printf "\n"
 								printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
 								read ip
 								test_cidr $ip
-								printf "\033[1;37mEnter IPv6 address in CIDR format. Eg: 2605:1700:1:2011::20/64: \033[0m"
-								read ip6
+								printf "\n"
 								printf "\033[1;37mEnter IPv4 gateway address: \033[0m"
 								read gw
 								test_ip $gw
+								printf "\n"
+								printf "\033[1;37mEnter IPv6 address in CIDR format. Eg: 2605:1700:1:2011::20/64: \033[0m"
+								read ip6
+								test_cidr6 $ip6
+								printf "\n"
 								printf "\033[1;37mEnter IPv6 gateway address: \033[0m"
 								read gw6
+								test_ip6 $gw6
+								printf "\n"
 								printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
 								read dns
 
-								# Validate IP's entered
-								
-								
 								# Write Static IP settings to interface config file
 								cat > /etc/netplan/${interface}.yaml <<EOF
 network:
@@ -320,12 +351,15 @@ EOF
 								fi
 							else
 								# No IPv6 support wanted
+								printf "\n"
 								printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
 								read ip
 								test_cidr $ip
+								printf "\n"
 								printf "\033[1;37mEnter gateway address: \033[0m"
 								read gw
 								test_ip $gw
+								printf "\n"
 								printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
 								read dns
 
@@ -482,12 +516,14 @@ do
             # Install required packages
             printf "\n\n"
             printf "\033[1;37mInstalling packages needed to join AD, please wait...\033[0m"
+			printf "\n"
             apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
 
             # Discover the NOVUSNOW.LOCAL domain
             realm -v discover novusnow.local
 
             # Prompt for OU to place Computer Object into
+			printf "\n"
             printf "\033[1;37mWhich OU should this Computer Object be created in?\n\033[0m"
             select ad_ou in Internal External
             do
