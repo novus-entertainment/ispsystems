@@ -4,7 +4,7 @@
 # Ubuntu 20.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version 0.18 - February 10, 2023
+# Version 19 - April 6, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="0.18"
+ver="19"
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -283,10 +283,14 @@ EOF
                                 # Comment out un-needed netplan settings
                                 if [ -z $gw ]
                                 then
-                                    sed -i "s/      gateway4/#      gateway4/" /etc/netplan/${interface}.yaml
+                                    sed -i "s/      routes/#      routes/" /etc/netplan/${interface}.yaml
+                                    sed -i "s/        - to/#        - to/" /etc/netplan/${interface}.yaml
+                                    sed -i "s/          via/#          via/" /etc/netplan/${interface}.yaml
                                 fi
                                 if [ -z $dns ]
                                 then
+                                    sed -i "s/      nameservers/#      nameservers/" /etc/netplan/${interface}.yaml
+                                    sed -i "s/          search/#          search/" /etc/netplan/${interface}.yaml
                                     sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
                                 fi
 
