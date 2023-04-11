@@ -4,7 +4,7 @@
 # Ubuntu 22.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 4 - March 24, 2023
+# Version: 5 - March 24, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=4
+ver=5
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -502,6 +502,12 @@ sed -Ezi.orig \
   -e 's/(def _output_esm_service_status.outstream, have_esm_service, service_type.:\n)/\1    return\n/' \
   -e 's/(def _output_esm_package_alert.*?\n.*?\n.:\n)/\1    return\n/' \
   /usr/lib/update-notifier/apt_check.py
+  
+# Disable Ubuntu DNS Stub Resolver
+sed -i "s/#DNSStubListener=yes/DNSStubListener=no/" /etc/systemd/resolved.conf
+systemctl stop systemd-resolved
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+systemctl start systemd-resolved
 
 
 ###################################################################################################
