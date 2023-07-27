@@ -4,7 +4,7 @@
 # Ubuntu 20.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version 19 - April 6, 2023
+# Version: 20 - July 27, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver="19"
+ver=20
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -47,13 +47,13 @@ auto_update () {
         if [ "$internet" = true ]
         then
             # Download script from GitHub repo
-            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/20.04/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
+            curl --insecure https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/20.04/sysprep.sh --output /root/sysprep_temp.sh &>/dev/null
 
             # Check version of downloaded script
-            version=$(awk -F'"' '/^ver=/ {print $2}' sysprep_temp.sh)
+            version=$(awk -F'=' '/^ver=/ {print $2}' sysprep_temp.sh)
 
             # If newer delete old sysprep.sh and replace with updated one
-            if [ "$version" != "$ver" ]
+            if [ $version -gt $ver ]
             then
                 rm /root/sysprep.sh
                 mv /root/sysprep_temp.sh /root/sysprep.sh
@@ -66,11 +66,17 @@ auto_update () {
                 printf "\033[1;31mA new version of the Sysprep script has been downloaded. Restarting the script in 5 seconds.\n\n\033[0m"
                 sleep 5
                 exec /root/sysprep.sh
-            else
+            elif [ $version -eq $ver ]
+			then
                 rm /root/sysprep_temp.sh
                 printf "\033[1;32mAlready running latest version of Sysprep script.\033[0m\n\n"
                 # Set updated variable as true
                 updated=true
+			elif [ $version -lt $ver ]
+			then
+				rm /root/sysprep_temp.sh
+				print printf "\033[1;33mLocal sysprep script is newer than repository version.\033[0m\n\n"
+				updated=true
             fi
         fi
     fi
@@ -122,55 +128,138 @@ printf "\033[1;32mTimezone set to ${timezonevar}\033[0m\n\n"
 ##      Configure network interfaces
 ###################################################################################################
 
+# Function to test IP address with CIDR
+test_cidr () {
+	IFS='./' read -r a b c d e <<< $1
+
+	for var in "$a" "$b" "$c" "$d" "$e"; do
+		case $var in
+			""|*[!0123456789]*) 
+				printf '\033[1;31mInvalid CIDR format IP address entered: $1\033[0m\n'
+				network_config
+		esac
+	done
+
+	ipaddr="$a.$b.$c.$d/$e"
+
+	if [ "$a" -ge 0 ] && [ "$a" -le 255 ] &&
+	   [ "$b" -ge 0 ] && [ "$b" -le 255 ] &&
+	   [ "$c" -ge 0 ] && [ "$c" -le 255 ] &&
+	   [ "$d" -ge 0 ] && [ "$d" -le 255 ] &&
+	   [ "$e" -ge 0 ] && [ "$e" -le 32  ]
+	then
+		# Do nothing
+		printf '\n'
+	else
+		printf '\033[1;31m"%s" is not a valid CIDR address\033[0m\n' "$ipaddr"
+		network_config
+	fi
+}
+
+test_cidr6 () {
+	regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}\/[1-9][1-9]$'
+	var="$1"
+
+	if [[ $var =~ $regex ]]; then
+		# Valid IPv6 CIDR Address
+		printf '\n'
+	else
+		printf '\033[1;31m"$1" is not a valid IPv6 CIDR address\033[0m\n'
+		network_config
+	fi
+}
+
+# Function to test IP address without CIDR
+test_ip () {
+	IFS='./' read -r a b c d <<< $1
+
+	for var in "$a" "$b" "$c" "$d"; do
+		case $var in
+			""|*[!0123456789]*) 
+				printf '\033[1;31mInvalid IP address entered: $1\033[0m\n'
+				network_config
+		esac
+	done
+
+	ipaddr="$a.$b.$c.$d/$e"
+
+	if [ "$a" -ge 0 ] && [ "$a" -le 255 ] &&
+	   [ "$b" -ge 0 ] && [ "$b" -le 255 ] &&
+	   [ "$c" -ge 0 ] && [ "$c" -le 255 ] &&
+	   [ "$d" -ge 0 ] && [ "$d" -le 255 ]
+	then
+		# Do nothing
+		printf '\n'
+	else
+		printf '\033[1;31m"%s" is not a valid IP address\033[0m\n' "$ipaddr"
+		network_config
+	fi
+}
+
+test_ip6 () {
+	regex='^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$'
+	var="$1"
+
+	if [[ $var =~ $regex ]]; then
+		# Valid IPv6 CIDR Address
+		printf '\n'
+	else
+		printf '\033[1;31m"$1" is not a valid IPv6 address\033[0m\n'
+		network_config
+	fi
+}
+
 # Option to configure network settings
+network_config () {
 printf "\033[1;37mConfigure network settings?\n\033[0m"
 select confignet in Yes No
 do
-    case $confignet in
-        "Yes")
-            # Delete old netplan files
-            rm -f /etc/netplan/*
+	case $confignet in
+		"Yes")
+			# Delete old netplan files
+			rm -f /etc/netplan/*
 
-            unset interfaces
+			unset interfaces
 
-            # Get array of interface names
-            interfaces=( $(ip link | awk -F: '$0 !~ "lo|vir|^[^0-9]"{print $2a;getline}') )
+			# Get array of interface names
+			interfaces=( $(ip link | awk -F: '$0 !~ "lo|vir|^[^0-9]"{print $2a;getline}') )
 
-            # Prompt user for settings for each interface detected and write to netplan config file
-            for interface in ${interfaces[@]}; do
-                printf "\033[1;33mSpecify settings for network interface: ${interface}\n\033[0m"
+			# Prompt user for settings for each interface detected and write to netplan config file
+			for interface in ${interfaces[@]}; do
+				printf "\n"
+				printf "\033[1;33mSpecify settings for network interface: ${interface}\n\033[0m"
 
-                # Ask if IPv6 support is wanted
-                printf "\033[1;37mDoes this interface need IPv6 configured?\n\033[0m"
-                select v6 in Yes No
-                do
-                    case $v6 in
-                        "Yes")
-                            v6support=true
-                            break
-                            ;;
-                        "No")
-                            v6support=false
-                            break
-                            ;;
-                        *)
-                            printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
-                    esac
-                done
+				# Ask if IPv6 support is wanted
+				printf "\033[1;37mDoes this interface need IPv6 configured?\n\033[0m"
+				select v6 in Yes No
+				do
+					case $v6 in
+						"Yes")
+							v6support=true
+							break
+							;;
+						"No")
+							v6support=false
+							break
+							;;
+						*)
+							printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
+					esac
+				done
 
-                unset type
+				unset type
 
-                printf "\n"
-                printf "\033[1;37mSelect interface type:\n\033[0m"
-                select type in DHCP Static
-                do
-                    case $type in
-                        "DHCP")
-                            # Write DHCP settings to interface config file
-                            if [ $v6support = true ]
-                            then
-                            # IPv6 support wanted
-                            cat > /etc/netplan/${interface}.yaml <<EOF
+				printf "\n"
+				printf "\033[1;37mSelect interface type:\n\033[0m"
+				select type in DHCP Static
+				do
+					case $type in
+						"DHCP")
+							# Write DHCP settings to interface config file
+							if [ $v6support = true ]
+							then
+							# IPv6 support wanted
+							cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -182,9 +271,9 @@ network:
       dhcp6: true
 
 EOF
-                else
-                # No IPv6 support wanted
-                cat > /etc/netplan/${interface}.yaml <<EOF
+				else
+				# No IPv6 support wanted
+				cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -196,27 +285,36 @@ network:
       dhcp6: false
 
 EOF
-                            fi
-                            printf "\n\n"
-                            break
-                            ;;
-                        "Static")
-                            if [ $v6support = true ]
-                            then
-                                # IPv6 support wanted
-                                printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
-                                read ip
-                                printf "\033[1;37mEnter IPv6 address in CIDR format. Eg: 2605:1700:1:2011::20/64: \033[0m"
-                                read ip6
-                                printf "\033[1;37mEnter IPv4 gateway address: \033[0m"
-                                read gw
-                                printf "\033[1;37mEnter IPv6 gateway address: \033[0m"
-                                read gw6
-                                printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
-                                read dns
+							fi
+							printf "\n\n"
+							break
+							;;
+						"Static")
+							if [ $v6support = true ]
+							then
+								# IPv6 support wanted
+								printf "\n"
+								printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
+								read ip
+								test_cidr $ip
+								printf "\n"
+								printf "\033[1;37mEnter IPv4 gateway address: \033[0m"
+								read gw
+								test_ip $gw
+								printf "\n"
+								printf "\033[1;37mEnter IPv6 address in CIDR format. Eg: 2605:1700:1:2011::20/64: \033[0m"
+								read ip6
+								test_cidr6 $ip6
+								printf "\n"
+								printf "\033[1;37mEnter IPv6 gateway address: \033[0m"
+								read gw6
+								test_ip6 $gw6
+								printf "\n"
+								printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
+								read dns
 
-                                # Write Static IP settings to interface config file
-                                cat > /etc/netplan/${interface}.yaml <<EOF
+								# Write Static IP settings to interface config file
+								cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -238,30 +336,35 @@ network:
           via: ${gw6}
 EOF
 
-                                # Comment out un-needed netplan settings
-                                if [ -z $gw ]
-                                then
-                                    sed -i "s/      gateway4/#      gateway4/" /etc/netplan/${interface}.yaml
-                                fi
-                                if [ -z $gw6 ]
-                                then
-                                    sed -i "s/      gateway6/#      gateway6/" /etc/netplan/${interface}.yaml
-                                fi
-                                if [ -z $dns ]
-                                then
-                                    sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
-                                fi
-                            else
-                                # No IPv6 support wanted
-                                printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
-                                read ip
-                                printf "\033[1;37mEnter gateway address: \033[0m"
-                                read gw
-                                printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
-                                read dns
+								# Comment out un-needed netplan settings
+								if [ -z $gw ]
+								then
+									sed -i "s/      gateway4/#      gateway4/" /etc/netplan/${interface}.yaml
+								fi
+								if [ -z $gw6 ]
+								then
+									sed -i "s/      gateway6/#      gateway6/" /etc/netplan/${interface}.yaml
+								fi
+								if [ -z $dns ]
+								then
+									sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
+								fi
+							else
+								# No IPv6 support wanted
+								printf "\n"
+								printf "\033[1;37mEnter IPv4 address in CIDR format. Eg: 192.168.66.20/24: \033[0m"
+								read ip
+								test_cidr $ip
+								printf "\n"
+								printf "\033[1;37mEnter gateway address: \033[0m"
+								read gw
+								test_ip $gw
+								printf "\n"
+								printf "\033[1;37mEnter comma separated list of nameservers: \033[0m"
+								read dns
 
-                                # Write Static IP settings to interface config file
-                                cat > /etc/netplan/${interface}.yaml <<EOF
+								# Write Static IP settings to interface config file
+								cat > /etc/netplan/${interface}.yaml <<EOF
 network:
   version: 2
   ethernets:
@@ -280,52 +383,51 @@ network:
           via: ${gw}
 EOF
 
-                                # Comment out un-needed netplan settings
-                                if [ -z $gw ]
-                                then
-                                    sed -i "s/      routes/#      routes/" /etc/netplan/${interface}.yaml
-                                    sed -i "s/        - to/#        - to/" /etc/netplan/${interface}.yaml
-                                    sed -i "s/          via/#          via/" /etc/netplan/${interface}.yaml
-                                fi
-                                if [ -z $dns ]
-                                then
-                                    sed -i "s/      nameservers/#      nameservers/" /etc/netplan/${interface}.yaml
-                                    sed -i "s/          search/#          search/" /etc/netplan/${interface}.yaml
-                                    sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
-                                fi
+								# Comment out un-needed netplan settings
+								if [ -z $gw ]
+								then
+									sed -i "s/      gateway4/#      gateway4/" /etc/netplan/${interface}.yaml
+								fi
+								if [ -z $dns ]
+								then
+									sed -i "s/          addresses/#          addresses/" /etc/netplan/${interface}.yaml
+								fi
 
-                            fi
-                            break
-                            ;;
-                        *)
-                            printf "Invalid selection ${REPLY}\n\n"
-                            break
-                            ;;
-                    esac
-                done
-            done
+							fi
+							break
+							;;
+						*)
+							printf "Invalid selection ${REPLY}\n\n"
+							break
+							;;
+					esac
+				done
+			done
 
-            # Apply netplan configuration
-            netplan apply
+			# Apply netplan configuration
+			netplan apply
 
-            # Sleep for 5 seconds to wait for interfaces to come up
-            sleep 5
-            printf "\n\n"
+			# Sleep for 5 seconds to wait for interfaces to come up
+			sleep 5
+			printf "\n\n"
 
-            # Check for Sysprep script updates
-            auto_update
+			# Check for Sysprep script updates
+			auto_update
 
-            break
-            ;;
-        "No")
-            # Skip network configuration
-            printf "\033[1;33mNetwork configuration skipped.\n\033[0m"
-            break
-            ;;
-        *)
-            printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
-    esac
+			break
+			;;
+		"No")
+			# Skip network configuration
+			printf "\033[1;33mNetwork configuration skipped.\n\033[0m"
+			break
+			;;
+		*)
+			printf "\033[1;31mPlease select Yes or No.\n\n\033[0m";;
+	esac
 done
+}
+
+network_config
 
 ###################################################################################################
 ##      Configure UFW Firewall
@@ -372,7 +474,6 @@ printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
 apt install -y git neofetch pv
 
-
 # Add neofetch to .bashrc to display summary after login
 checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
 if [[ -z ${checkneofetch} ]]
@@ -386,6 +487,29 @@ neofetch
 EOF
 fi
 
+
+###################################################################################################
+##      QoL Improvements
+###################################################################################################
+printf "\n\n"
+printf "\033[1;37mMaking quality of life improvements, please wait...\n\n\033[0m"
+
+# Disable MOTD News
+sed -i "s/ENABLED=1/ENABLED=0/" /etc/default/motd-news
+
+# Disable ESM Messages
+sed -Ezi.orig \
+  -e 's/(def _output_esm_service_status.outstream, have_esm_service, service_type.:\n)/\1    return\n/' \
+  -e 's/(def _output_esm_package_alert.*?\n.*?\n.:\n)/\1    return\n/' \
+  /usr/lib/update-notifier/apt_check.py
+  
+# Disable Ubuntu DNS Stub Resolver
+sed -i "s/#DNSStubListener=yes/DNSStubListener=no/" /etc/systemd/resolved.conf
+systemctl stop systemd-resolved
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+systemctl start systemd-resolved
+
+
 ###################################################################################################
 ##      Join Active Directory
 ###################################################################################################
@@ -398,12 +522,14 @@ do
             # Install required packages
             printf "\n\n"
             printf "\033[1;37mInstalling packages needed to join AD, please wait...\033[0m"
+			printf "\n"
             apt -y install realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
 
             # Discover the NOVUSNOW.LOCAL domain
             realm -v discover novusnow.local
 
             # Prompt for OU to place Computer Object into
+			printf "\n"
             printf "\033[1;37mWhich OU should this Computer Object be created in?\n\033[0m"
             select ad_ou in Internal External
             do
@@ -486,8 +612,8 @@ do
             printf "\033[1;37m\nAdding Zabbix repository and installing packages, please wait...\n\033[0m"
             
             # Add official repository
-            wget --inet4-only https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.2-2%2Bubuntu20.04_all.deb
-            dpkg -i zabbix-release_6.2-2+ubuntu20.04_all.deb
+            wget --inet4-only https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu20.04_all.deb
+            dpkg -i zabbix-release_latest+ubuntu20.04_all.deb
 
             # Install Zabbix Agent 2
             apt update &>/dev/null
@@ -523,7 +649,7 @@ do
 
             # Download Zabbix Agent2 config file from git repo
             mv /etc/zabbix/zabbix_agent2.conf /etc/zabbix/zabbix_agent2.conf.bak
-            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/zabbix/config/agent/ubuntu20.04/zabbix_agent2.conf --output /etc/zabbix/zabbix_agent2.conf
+            curl https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/zabbix/config/agent/ubuntu22.04/zabbix_agent2.conf --output /etc/zabbix/zabbix_agent2.conf
 
             # Modify server setting in config file
             sed -i "s/^Server=/Server=${server}/" /etc/zabbix/zabbix_agent2.conf
