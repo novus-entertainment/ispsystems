@@ -4,7 +4,7 @@
 # Ubuntu 22.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 5 - March 24, 2023
+# Version: 6 - July 27, 2023
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=5
+ver=6
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -612,7 +612,7 @@ do
             printf "\033[1;37m\nAdding Zabbix repository and installing packages, please wait...\n\033[0m"
             
             # Add official repository
-            wget --inet4-only https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.2-4+ubuntu22.04_all.deb
+            wget --inet4-only https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu22.04_all.deb
             dpkg -i zabbix-release_6.2-4+ubuntu22.04_all.deb
 
             # Install Zabbix Agent 2
