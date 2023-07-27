@@ -613,7 +613,7 @@ do
             
             # Add official repository
             wget --inet4-only https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu22.04_all.deb
-            dpkg -i zabbix-release_6.2-4+ubuntu22.04_all.deb
+            dpkg -i zabbix-release_latest+ubuntu22.04_all.deb
 
             # Install Zabbix Agent 2
             apt update &>/dev/null
