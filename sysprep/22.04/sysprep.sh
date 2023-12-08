@@ -328,7 +328,7 @@ EOF
                                             ;;
                                         "Private")
                                             # Private servers selected
-                                            dns="192.168.80.6, 192.168.80.7"
+                                            dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
                                         *)
@@ -395,7 +395,7 @@ EOF
                                             ;;
                                         "Private")
                                             # Private servers selected
-                                            dns="192.168.80.6, 192.168.80.7"
+                                            dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
                                         *)
