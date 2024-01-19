@@ -12,6 +12,7 @@
 #    - Set timezone
 #    - Configuire network interfaces
 #    - Configure stock firewall rules
+#    - Install & configure Nala instead of APT
 #    - Update system
 #    - Install common utilities
 #    - Join Active Directory
@@ -19,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=10
+ver=11
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -496,6 +497,21 @@ then
     ufw --force enable &> /dev/null
 fi
 
+###################################################################################################
+##      Install Nala Apt Frontend (If not not already installed)
+###################################################################################################
+printf "\n\n"
+printf "\033[1;37mInstalling Nala if not already installed...\n\033[0m"
+if [ $(dpkg-query -W -f='${Status}' nala 2>/dev/null | grep -c "ok installed") -eq 0 ];
+then
+  wget https://gitlab.com/volian/volian-archive/uploads/b20bd8237a9b20f5a82f461ed0704ad4/volian-archive-keyring_0.1.0_all.deb &> /dev/null
+  wget https://gitlab.com/volian/volian-archive/uploads/4ba4a75e391aa36f0cbe7fb59685eda9/volian-archive-scar_0.1.0_all.deb &> /dev/null
+  dpkg -i volian-archive-keyring_0.1.0_all.deb &> /dev/null
+  dpkg -i volian-archive-scar_0.1.0_all.deb &> /dev/null
+  rm volian-archive-* &> /dev/null
+  apt update &> /dev/null
+  apt install nala -y &> /dev/null
+fi
 
 ###################################################################################################
 ##      Update OS
@@ -517,15 +533,34 @@ printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
 nala install -y git neofetch pv
 
+# Use nala instead of apt
+checknala=$(grep '/etc/skel/.bashrc' -e 'nala')
+if [[ -z ${checknala} ]]
+then
+   cat >> /etc/skel/.bashrc <<EOF
+# Use nala instead of apt
+alias apt='nala'
+alias apt-get='nala'
+EOF
+
+    cat >> /home/admin/.bashrc <<EOF
+# Use nala instead of apt
+alias apt='nala'
+alias apt-get='nala'
+EOF
+fi
+
 # Add neofetch to .bashrc to display summary after login
 checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
 if [[ -z ${checkneofetch} ]]
 then
    cat >> /etc/skel/.bashrc <<EOF
+# Display neofetch summary
 neofetch
 EOF
 
     cat >> /home/admin/.bashrc <<EOF
+# Display neofetch summary
 neofetch
 EOF
 fi
