@@ -504,12 +504,7 @@ printf "\n\n"
 printf "\033[1;37mInstalling Nala if not already installed...\n\033[0m"
 if [ $(dpkg-query -W -f='${Status}' nala 2>/dev/null | grep -c "ok installed") -eq 0 ];
 then
-#  wget https://gitlab.com/volian/volian-archive/uploads/b20bd8237a9b20f5a82f461ed0704ad4/volian-archive-keyring_0.1.0_all.deb &> /dev/null
-#  wget https://gitlab.com/volian/volian-archive/uploads/4ba4a75e391aa36f0cbe7fb59685eda9/volian-archive-scar_0.1.0_all.deb &> /dev/null
-#  dpkg -i volian-archive-keyring_0.1.0_all.deb &> /dev/null
-#  dpkg -i volian-archive-scar_0.1.0_all.deb &> /dev/null
   curl https://gitlab.com/volian/volian-archive/-/raw/main/install-nala.sh | bash
-#  rm volian-archive-* &> /dev/null
   apt update &> /dev/null
   apt install nala -y &> /dev/null
 fi
