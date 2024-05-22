@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ###################################################################################################
-# Ubuntu 22.04 Sysprep Script
+# Ubuntu 24.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 10 - December 8, 2023
+# Version: 1 - May 22, 2024
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=11
+ver=1
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -48,7 +48,7 @@ auto_update () {
         if [ "$internet" = true ]
         then
             # Download script from GitHub repo
-            curl --insecure https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/22.04/sysprep.sh --output /root/sysprep_temp.sh &> /dev/null
+            curl --insecure https://raw.githubusercontent.com/novus-entertainment/ispsystems/main/sysprep/24.04/sysprep.sh --output /root/sysprep_temp.sh &> /dev/null
 
             # Check version of downloaded script
             version=$(awk -F'=' '/^ver=/ {print $2}' sysprep_temp.sh)
