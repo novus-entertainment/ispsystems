@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=12
+ver=13
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -346,7 +346,7 @@ network:
 
     ${interface}:
       optional: true
-      accept-ra: true
+      accept-ra: false
       addresses:
           - ${ip}
           - ${ip6}
