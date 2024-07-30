@@ -274,7 +274,7 @@ network:
 
     ${interface}:
       optional: true
-      accept-ra: true
+      accept-ra: false
       dhcp4: true
       dhcp6: true
 
@@ -346,7 +346,7 @@ network:
 
     ${interface}:
       optional: true
-      accept-ra: true
+      accept-ra: false
       addresses:
           - ${ip}
           - ${ip6}
