@@ -587,7 +587,7 @@ EOF
             # Allow specific AD groups to have SUDO permission
             cat >> /etc/sudoers <<EOF
 # Active Directory Groups
-%isp\ server\ admins     ALL=(ALL)       NOPASSWD: ALL
+%isp\ server\ admins     ALL=(ALL)       ALL
 EOF
             break
             ;;
