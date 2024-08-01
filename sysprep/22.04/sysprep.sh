@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=13
+ver=14
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -661,7 +661,7 @@ EOF
             # Allow specific AD groups to have SUDO permission
             cat >> /etc/sudoers <<EOF
 # Active Directory Groups
-%isp\ server\ admins     ALL=(ALL)       NOPASSWD: ALL
+%isp\ server\ admins     ALL=(ALL)       ALL
 EOF
             break
             ;;
