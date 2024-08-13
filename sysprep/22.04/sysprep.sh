@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=14
+ver=15
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -510,6 +510,18 @@ then
 fi
 
 ###################################################################################################
+##      Install fastfetch PPA repository (If not not already installed)
+###################################################################################################
+printf "\n\n"
+printf "\033[1;37mInstalling fastfetch PPA repository if not already installed...\n\033[0m"
+if [ $(dpkg-query -W -f='${Status}' fastfetch 2>/dev/null | grep -c "ok installed") -eq 0 ];
+then
+  sudo add-apt-repository ppa:zhangsongcui3371/fastfetch -y
+  apt update &> /dev/null
+  apt install fastfetch -7 &> /dev/null
+fi
+
+###################################################################################################
 ##      Update OS
 ###################################################################################################
 printf "\n\n"
@@ -527,7 +539,7 @@ nala autoremove -y
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-nala install -y git neofetch pv
+nala install -y git pv btop
 
 # Use nala instead of apt
 checknala=$(grep '/etc/skel/.bashrc' -e 'nala')
@@ -546,18 +558,42 @@ alias apt-get='nala'
 EOF
 fi
 
-# Add neofetch to .bashrc to display summary after login
-checkneofetch=$(grep '/etc/skel/.bashrc' -e 'neofetch')
-if [[ -z ${checkneofetch} ]]
+# Add fastfetch to .bashrc to display summary after login
+checkfastfetch=$(grep '/etc/skel/.bashrc' -e 'fastfetch')
+if [[ -z ${checkfastfetch} ]]
 then
    cat >> /etc/skel/.bashrc <<EOF
-# Display neofetch summary
-neofetch
+# Display fastfetch summary
+fastfetch --logo /opt/fastfetch/novuslogo.txt --logo-color-1 "white"
 EOF
 
     cat >> /home/admin/.bashrc <<EOF
-# Display neofetch summary
-neofetch
+# Display fastfetch summary
+fastfetch --logo /opt/fastfetch/novuslogo.txt --logo-color-1 "white"
+EOF
+
+    mkdir -p /opt/fastfetch
+    cat > /opt/fastfetch/novuslogo.txt <<EOF
+                                                  
+												  
+                 @@@@@@@@@@@@@@@@                 
+             @@@@@@@@@@@@@@@@@@@@                 
+          @@@@@@@@@@@@@@@@@@@@@@@      @          
+        @@@@@@@@@@@@@@@@@@@@@@@@@      @@@        
+      @@@@@@@@@@@@@@@@@@@@@@@@@@@      @@@@@      
+     @@@@@@@@         @@@@@@@@@@@      @@@@@@     
+     @@@@@@@             @@@@@@@@      @@@@@@@    
+    @@@@@@@@                @@@@@      @@@@@@@    
+    @@@@@@@@      @@@@                 @@@@@@@    
+    @@@@@@@@      @@@@@@               @@@@@@@    
+     @@@@@@@      @@@@@@@@@           @@@@@@@     
+      @@@@@@      @@@@@@@@@@@@      @@@@@@@@%     
+       @@@@@      @@@@@@@@@@@@@@@@@@@@@@@@@       
+         @@@      @@@@@@@@@@@@@@@@@@@@@@@/        
+           @      @@@@@@@@@@@@@@@@@@@@@           
+                  @@@@@@@@@@@@@@@@@@              
+                      @@@@@@.                     
+                                                  
 EOF
 fi
 
