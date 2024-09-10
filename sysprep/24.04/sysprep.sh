@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=4
+ver=5
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -517,8 +517,8 @@ printf "\033[1;37mInstalling fastfetch PPA repository if not already installed..
 if [ $(dpkg-query -W -f='${Status}' fastfetch 2>/dev/null | grep -c "ok installed") -eq 0 ];
 then
   sudo add-apt-repository ppa:zhangsongcui3371/fastfetch -y
-  apt update &> /dev/null
-  apt install fastfetch -7 &> /dev/null
+  nala update &> /dev/null
+  nala install fastfetch -y &> /dev/null
 fi
 
 ###################################################################################################
