@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=15
+ver=16
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -518,7 +518,7 @@ if [ $(dpkg-query -W -f='${Status}' fastfetch 2>/dev/null | grep -c "ok installe
 then
   sudo add-apt-repository ppa:zhangsongcui3371/fastfetch -y
   apt update &> /dev/null
-  apt install fastfetch -7 &> /dev/null
+  apt install fastfetch -y &> /dev/null
 fi
 
 ###################################################################################################
