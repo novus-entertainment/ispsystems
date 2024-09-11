@@ -509,6 +509,9 @@ then
   apt update &> /dev/null
   apt install nala -y &> /dev/null
 fi
+# Modify default nala settings.
+sed -i "s/update_show_packages = false/update_show_packages = true/" /etc/nala/nala.conf
+sed -i "s/transfer_speed_bits = false/transfer_speed_bits = true/" /etc/nala/nala.conf
 
 ###################################################################################################
 ##      Install fastfetch PPA repository (If not not already installed)
@@ -722,8 +725,8 @@ do
             printf "\033[1;37m\nAdding Zabbix repository and installing packages, please wait...\n\033[0m"
 
             # Add official repository
-            wget --inet4-only https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu24.04_all.deb
-            dpkg -i zabbix-release_6.4-1+ubuntu24.04_all.deb
+            wget --inet4-only https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu24.04_all.deb
+            dpkg -i zabbix-release_latest+ubuntu24.04_all.deb
 
             # Install Zabbix Agent 2
             nala update &>/dev/null
