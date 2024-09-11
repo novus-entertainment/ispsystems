@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=16
+ver=17
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -332,8 +332,13 @@ EOF
                                             dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
+                                        "Custom")
+                                            # Custom servers specified
+                                            printf "\033[1;37mPlease specify custom DNS servers separated by a comma (dns_ip,dns_ip): \033[0m"
+                                            read customdns
+                                            dns=$customdns
                                         *)
-                                            printf "\033[1;31mPlease select Public or Private.\n\n\033[0m"
+                                            printf "\033[1;31mPlease select Public (DNSDist), Private (AD DNS), or Custom.\n\n\033[0m"
                                             ;;
                                     esac
                                 done
@@ -399,8 +404,13 @@ EOF
                                             dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
+                                        "Custom")
+                                            # Custom servers specified
+                                            printf "\033[1;37mPlease specify custom DNS servers separated by a comma (dns_ip,dns_ip): \033[0m"
+                                            read customdns
+                                            dns=$customdns
                                         *)
-                                            printf "\033[1;31mPlease select Public or Private.\n\n\033[0m"
+                                            printf "\033[1;31mPlease select Public (DNSDist), Private (AD DNS), or Custom.\n\n\033[0m"
                                             ;;
                                     esac
                                 done
