@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=6
+ver=7
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -33,6 +33,7 @@ clear
 ###################################################################################################
 
 auto_update () {
+    unset updated
     # Check if updated variable is true
     if [ -z "$updated" ]
     then
