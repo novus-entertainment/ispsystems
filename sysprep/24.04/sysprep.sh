@@ -319,7 +319,7 @@ EOF
                                 test_ip6 $gw6
                                 printf "\n"
                                 printf "\n\n\n\033[1;32mPlease select DNS servers to use:\n\033[0m"
-                                select nameservers in Public Private Custom
+                                select nameservers in Public Private
                                 do
                                     case $nameservers in
                                         "Public")
@@ -332,13 +332,8 @@ EOF
                                             dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
-                                        "Custom")
-                                            # Custom servers specified
-                                            printf "\033[1;37mPlease specify custom DNS servers separated by a comma (dns_ip,dns_ip): \033[0m"
-                                            read customdns
-                                            dns=$customdns
                                         *)
-                                            printf "\033[1;31mPlease select Public (DNSDist), Private (AD DNS), or Custom.\n\n\033[0m"
+                                            printf "\033[1;31mPlease select Public (DNSDist) or Private (AD DNS).\n\n\033[0m"
                                             ;;
                                     esac
                                 done
@@ -404,13 +399,8 @@ EOF
                                             dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
-                                        "Custom")
-                                            # Custom servers specified
-                                            printf "\033[1;37mPlease specify custom DNS servers separated by a comma (dns_ip,dns_ip): \033[0m"
-                                            read customdns
-                                            dns=$customdns
                                         *)
-                                            printf "\033[1;31mPlease select Public (DNSDist), Private (AD DNS), or Custom.\n\n\033[0m"
+                                            printf "\033[1;31mPlease select Public (DNSDist) or Private (AD DNS).\n\n\033[0m"
                                             ;;
                                     esac
                                 done
