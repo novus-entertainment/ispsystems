@@ -332,11 +332,6 @@ EOF
                                             dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
-                                        "Custom")
-                                            # Custom servers specified
-                                            printf "\033[1;37mPlease specify custom DNS servers separated by a comma (dns_ip,dns_ip): \033[0m"
-                                            read customdns
-                                            dns=$customdns
                                         *)
                                             printf "\033[1;31mPlease select Public (DNSDist), Private (AD DNS), or Custom.\n\n\033[0m"
                                             ;;
@@ -404,11 +399,6 @@ EOF
                                             dns="192.168.56.2, 192.168.56.3"
                                             break
                                             ;;
-                                        "Custom")
-                                            # Custom servers specified
-                                            printf "\033[1;37mPlease specify custom DNS servers separated by a comma (dns_ip,dns_ip): \033[0m"
-                                            read customdns
-                                            dns=$customdns
                                         *)
                                             printf "\033[1;31mPlease select Public (DNSDist), Private (AD DNS), or Custom.\n\n\033[0m"
                                             ;;
@@ -518,6 +508,9 @@ then
   apt update &> /dev/null
   apt install nala -y &> /dev/null
 fi
+# Modify default nala settings.
+sed -i "s/update_show_packages = false/update_show_packages = true/" /etc/nala/nala.conf
+sed -i "s/transfer_speed_bits = false/transfer_speed_bits = true/" /etc/nala/nala.conf
 
 ###################################################################################################
 ##      Install fastfetch PPA repository (If not not already installed)
