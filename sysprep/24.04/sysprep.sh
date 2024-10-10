@@ -4,7 +4,7 @@
 # Ubuntu 24.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 1 - May 22, 2024
+# Version: 9 - Oct 10, 2024
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=8
+ver=9
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -85,6 +85,14 @@ auto_update () {
 }
 
 auto_update
+
+###################################################################################################
+##      Generate new Machine ID
+###################################################################################################
+printf "\033[1;32mChanging Machine ID\033[0m\n\n"
+rm -rf /etc/machine-id
+systemd-machine-id-setup
+printf "\n\n"
 
 ###################################################################################################
 ##      Set hostname
@@ -276,6 +284,7 @@ network:
     ${interface}:
       optional: true
       accept-ra: false
+      dhcp-identifier: mac
       dhcp4: true
       dhcp6: true
 
@@ -290,6 +299,7 @@ network:
     ${interface}:
       optional: true
       accept-ra: false
+      dhcp-identifier: mac
       dhcp4: true
       dhcp6: false
 
