@@ -4,7 +4,7 @@
 # Ubuntu 24.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 9 - Oct 10, 2024
+# Version: 10 - Nov 7, 2024
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
