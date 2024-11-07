@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=9
+ver=10
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -37,8 +37,8 @@ auto_update () {
     # Check if updated variable is true
     if [ -z "$updated" ]
     then
-        # Check if machine has access to the internet by querying connection to google.ca
-        wget -q --inet4-only --tries=10 --timeout=20 --spider https://google.ca
+        # Check if machine has access to the internet by querying connection to github.com
+        wget -q --inet4-only --tries=10 --timeout=20 --spider https://github.com
         if [[ $? -eq 0 ]]
         then
             internet=true
