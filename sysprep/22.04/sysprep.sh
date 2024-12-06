@@ -619,10 +619,6 @@ fi
 printf "\n\n"
 printf "\033[1;37mMaking quality of life improvements, please wait...\n\n\033[0m"
 
-# Remove all login messages from Ubuntu
-touch /home/admin/.hushlogin
-touch /etc/skel/.hushlogin
-  
 # Disable Ubuntu DNS Stub Resolver
 sed -i "s/#DNSStubListener=yes/DNSStubListener=no/" /etc/systemd/resolved.conf
 systemctl stop systemd-resolved
