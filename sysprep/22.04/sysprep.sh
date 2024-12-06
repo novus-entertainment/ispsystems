@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=19
+ver=20
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -520,8 +520,9 @@ then
   apt install nala -y &> /dev/null
 fi
 # Modify default nala settings.
-sed -i "s/update_show_packages = false/update_show_packages = true/" /etc/nala/nala.conf
-sed -i "s/transfer_speed_bits = false/transfer_speed_bits = true/" /etc/nala/nala.conf
+sed -i 's/full_upgrade = false/full_upgrade = true/g' /etc/nala/nala.conf
+sed -i 's/update_show_packages = false/update_show_packages = true/g' /etc/nala/nala.conf
+sed -i 's/transfer_speed_bits = false/transfer_speed_bits = true/g' /etc/nala/nala.conf
 
 ###################################################################################################
 ##      Install fastfetch PPA repository (If not not already installed)
@@ -618,14 +619,9 @@ fi
 printf "\n\n"
 printf "\033[1;37mMaking quality of life improvements, please wait...\n\n\033[0m"
 
-# Disable MOTD News
-sed -i "s/ENABLED=1/ENABLED=0/" /etc/default/motd-news
-
-# Disable ESM Messages
-sed -Ezi.orig \
-  -e 's/(def _output_esm_service_status.outstream, have_esm_service, service_type.:\n)/\1    return\n/' \
-  -e 's/(def _output_esm_package_alert.*?\n.*?\n.:\n)/\1    return\n/' \
-  /usr/lib/update-notifier/apt_check.py
+# Remove all login messages from Ubuntu
+touch /home/admin/.hushlogin
+touch /etc/skel/.hushlogin
   
 # Disable Ubuntu DNS Stub Resolver
 sed -i "s/#DNSStubListener=yes/DNSStubListener=no/" /etc/systemd/resolved.conf
