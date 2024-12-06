@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=10
+ver=11
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
