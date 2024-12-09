@@ -4,7 +4,7 @@
 # Ubuntu 24.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 10 - Nov 7, 2024
+# Version: 12 - Dec 9, 2024
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=11
+ver=12
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -541,8 +541,6 @@ fi
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling OS updates, please wait...\n\033[0m"
-pro config set apt_news=false
-nala update
 nala upgrade -y
 
 # Remove packages that are no longer required
