@@ -4,7 +4,7 @@
 # Ubuntu 24.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 12 - Dec 9, 2024
+# Version: 13 - Dec 18, 2024
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -20,7 +20,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=12
+ver=13
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -552,23 +552,6 @@ nala autoremove -y
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
 nala install -y git pv btop
-
-# Use nala instead of apt
-checknala=$(grep '/etc/skel/.bashrc' -e 'nala')
-if [[ -z ${checknala} ]]
-then
-   cat >> /etc/skel/.bashrc <<EOF
-# Use nala instead of apt
-alias apt='nala'
-alias apt-get='nala'
-EOF
-
-    cat >> /home/admin/.bashrc <<EOF
-# Use nala instead of apt
-alias apt='nala'
-alias apt-get='nala'
-EOF
-fi
 
 # Add fastfetch to .bashrc to display summary after login
 checkfastfetch=$(grep '/etc/skel/.bashrc' -e 'fastfetch')
