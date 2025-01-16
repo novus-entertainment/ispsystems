@@ -12,7 +12,6 @@
 #    - Set timezone
 #    - Configuire network interfaces
 #    - Configure stock firewall rules
-#    - Install & configure Nala instead of APT
 #    - Update system
 #    - Install common utilities
 #    - Join Active Directory
@@ -509,22 +508,6 @@ then
 fi
 
 ###################################################################################################
-##      Install Nala Apt Frontend (If not not already installed)
-###################################################################################################
-printf "\n\n"
-printf "\033[1;37mInstalling Nala if not already installed...\n\033[0m"
-if [ $(dpkg-query -W -f='${Status}' nala 2>/dev/null | grep -c "ok installed") -eq 0 ];
-then
-  curl https://gitlab.com/volian/volian-archive/-/raw/main/install-nala.sh | bash
-  apt update &> /dev/null
-  apt install nala -y &> /dev/null
-fi
-# Modify default nala settings.
-sed -i 's/full_upgrade = false/full_upgrade = true/g' /etc/nala/nala.conf
-sed -i 's/update_show_packages = false/update_show_packages = true/g' /etc/nala/nala.conf
-sed -i 's/transfer_speed_bits = false/transfer_speed_bits = true/g' /etc/nala/nala.conf
-
-###################################################################################################
 ##      Install fastfetch PPA repository (If not not already installed)
 ###################################################################################################
 printf "\n\n"
@@ -542,11 +525,11 @@ fi
 printf "\n\n"
 printf "\033[1;37mInstalling OS updates, please wait...\n\033[0m"
 pro config set apt_news=false
-nala update
-nala upgrade -y
+apt update
+apt upgrade -y
 
 # Remove packages that are no longer required
-nala autoremove -y
+apt autoremove -y
 
 
 ###################################################################################################
@@ -554,24 +537,7 @@ nala autoremove -y
 ###################################################################################################
 printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
-nala install -y git pv btop
-
-# Use nala instead of apt
-checknala=$(grep '/etc/skel/.bashrc' -e 'nala')
-if [[ -z ${checknala} ]]
-then
-   cat >> /etc/skel/.bashrc <<EOF
-# Use nala instead of apt
-alias apt='nala'
-alias apt-get='nala'
-EOF
-
-    cat >> /home/admin/.bashrc <<EOF
-# Use nala instead of apt
-alias apt='nala'
-alias apt-get='nala'
-EOF
-fi
+apt install -y git pv btop
 
 # Add fastfetch to .bashrc to display summary after login
 checkfastfetch=$(grep '/etc/skel/.bashrc' -e 'fastfetch')
@@ -639,7 +605,7 @@ do
             printf "\n\n"
             printf "\033[1;37mInstalling packages needed to join AD, please wait...\033[0m"
             printf "\n"
-            nala install -y realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
+            apt install -y realmd sssd sssd-tools libnss-sss libpam-sss adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
 
             # Discover the NOVUSNOW.LOCAL domain
             realm -v discover NOVUSNOW.LOCAL    # Domain discovery name MUST be in CAPITAL LETTERS or joining will fail
@@ -732,8 +698,8 @@ do
             dpkg -i zabbix-release_latest+ubuntu22.04_all.deb
 
             # Install Zabbix Agent 2
-            nala update &>/dev/null
-            nala install zabbix-agent2
+            apt update &>/dev/null
+            apt install zabbix-agent2
 
             # Stop agent and enable service
             systemctl stop zabbix-agent2
