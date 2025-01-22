@@ -4,7 +4,7 @@
 # Ubuntu 24.04 Sysprep Script
 #
 # Created by: Brian Hill
-# Version: 13 - Dec 18, 2024
+# Version: 15 - January 22, 2025
 #
 # Run this script to configure the newly deployed VM.
 #    - Check for script update and restart script if found
@@ -19,7 +19,7 @@
 ###################################################################################################
 
 # Script version. Used for auto-updating from git repository.
-ver=14
+ver=15
 
 # Reset all screen formatting and clear screen
 printf "\033[0m"
@@ -525,10 +525,18 @@ printf "\n\n"
 printf "\033[1;37mInstalling common utilities, please wait\n\033[0m"
 apt install -y git pv btop
 
+
 # Add fastfetch to .bashrc to display summary after login
 checkfastfetch=$(grep '/etc/skel/.bashrc' -e 'fastfetch')
 if [[ -z ${checkfastfetch} ]]
 then
+# Add PPA for fastfetch
+sudo add-apt-repository ppa:zhangsongcui3371/fastfetch -y
+
+# Install fastfetch
+apt update && apt install fastfetch -y
+
+# Add fastfetch to .bashrc template and admin
    cat >> /etc/skel/.bashrc <<EOF
 # Display fastfetch summary
 fastfetch --logo /opt/fastfetch/novuslogo.txt --logo-color-1 "white"
